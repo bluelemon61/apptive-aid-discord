@@ -1,31 +1,47 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Events, Client, GatewayIntentBits, Interaction } from 'discord.js';
 import { config } from 'dotenv';
+import commands from "./commands";
 
 // Load .env 
 config();
 
-const client = new Client({ 
+// TODO - PrismaClient 연결
+
+const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds, 
-    GatewayIntentBits.GuildMessages, 
-    GatewayIntentBits.MessageContent
-  ],
+    // GatewayIntentBits.Guilds,
+    // GatewayIntentBits.GuildMessages,
+    // GatewayIntentBits.MessageContent,
+  ]
 });
 
-client.once('ready', () => {
+const startBot = async () => {
+  await client.login(process.env.DISCORD_TOKEN);
+  console.info("Discord bot is logged!");
+
+  client.on(Events.ClientReady, async () => {
     console.log("Discord bot is ready! 🤖");
-});
+    if (client.application) {
+      await client.application.commands.set(commands);
+      console.log("info: command가 등록되었습니다.");
+      console.log(`command 목록:`);
+      commands.forEach((command) => {
+        console.log(command.name);
+      })
+    }
+  });
+  
+  client.on(Events.InteractionCreate, async (interaction: Interaction) => {
+    if (interaction.isCommand()) {
+      const currentCommand = commands.find(({name}) => name === interaction.commandName);
+  
+      if (currentCommand) {
+        await interaction.deferReply();
+        currentCommand.execute(client, interaction);
+        console.log(`info: command ${currentCommand.name}이 실행되었습니다.`);
+      }
+    }
+  })
+};
 
-client.on('messageCreate', message => {
-  if (message.content === 'ping') {
-      message.channel.send('pong');
-  }
-});
-
-client.on('error', err => {
-  console.error('Error: ', err);
-})
-
-client.login(process.env.DISCORD_TOKEN).catch(err => {
-  console.error('Failed to login: ', err)
-});
+startBot();
