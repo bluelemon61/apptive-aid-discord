@@ -8,26 +8,16 @@ datasource db {
 }
 
 model Server {
-  id              Int             @id @db.UnsignedInt @default(autoincrement())
-  serverId        Int             @db.UnsignedInt
+  id              String          @id
 
-  adminRole       AdminRole[]
   sendChannel     SendChannel[]
   receiveChannel  ReceiveChannel[]
 }
 
-model AdminRole {
-  id            Int             @id @db.UnsignedInt @default(autoincrement())
-  serverId      Int             @db.UnsignedInt
-  roleId        Int             @db.UnsignedInt
-
-  server        Server          @relation(fields: [serverId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
 model SendChannel {
-  id              Int             @id @db.UnsignedInt @default(autoincrement())
-  serverId        Int             @db.UnsignedInt
-  channelId       Int             @db.UnsignedInt
+  id              Int          @id @default(autoincrement())
+  channelId       String
+  serverId        String
   
   receiveChannels SendToReceive[]
 
@@ -35,9 +25,9 @@ model SendChannel {
 }
 
 model ReceiveChannel {
-  id            Int             @id @db.UnsignedInt @default(autoincrement())
-  serverId      Int             @db.UnsignedInt
-  channelId     Int             @db.UnsignedInt
+  id            Int            @id @default(autoincrement())
+  channelId     String
+  serverId      String
 
   sendChannels  SendToReceive[]
 
@@ -45,8 +35,8 @@ model ReceiveChannel {
 }
 
 model SendToReceive {
-  sendChannelId       Int             @db.UnsignedInt
-  receiveChannelId    Int             @db.UnsignedInt
+  sendChannelId       Int
+  receiveChannelId    Int
 
   sendChannel         SendChannel     @relation(fields: [sendChannelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   receiveChannel      ReceiveChannel  @relation(fields: [receiveChannelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
