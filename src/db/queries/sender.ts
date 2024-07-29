@@ -41,3 +41,12 @@ export async function addSendrerChannel(serverId: string, channelId: string) {
     },
   });
 }
+
+export async function deleteSenderChannel(serverId: string, channelId: string) {
+  return prisma.sendChannel.deleteMany({
+    where: {
+      serverId,
+      channelId,
+    },
+  });
+}

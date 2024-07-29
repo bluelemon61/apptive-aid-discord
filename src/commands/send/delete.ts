@@ -2,23 +2,30 @@ import {
   ApplicationCommandOptionType,
   AutocompleteInteraction,
   ChatInputCommandInteraction,
+  Interaction,
 } from "discord.js";
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { getSenderChannels } from "@/db/queries/sender";
+import { deleteSenderChannel, getSenderChannels } from "@/db/queries/sender";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
-async function getSendChannels(interaction: AutocompleteInteraction) {
+async function getSendChannels(interaction: Interaction, query: string = "") {
+  const channels = await getSenderChannels(interaction.guildId!, interaction);
+
+  return channels.filter((channel) => channel.name.includes(query));
+}
+
+async function getOptions(interaction: AutocompleteInteraction) {
   if (!interaction.guild) return;
 
   const input = interaction.options.getString("channel") || "";
-  const channels = await getSenderChannels(interaction.guildId!, interaction);
 
   return interaction.respond(
-    channels
-      .filter((channel) => channel.name.includes(input))
+    (await getSendChannels(interaction, input))
       .map((channel) => ({
         name: channel.name,
         value: channel.id,
       }))
+      .slice(0, 25)
   );
 }
 
@@ -32,10 +39,32 @@ export class Sender {
       description: "the channel to delete as a sender",
       required: true,
       type: ApplicationCommandOptionType.String,
-      autocomplete: getSendChannels,
+      autocomplete: getOptions,
     })
+    channel: string,
     interaction: ChatInputCommandInteraction
   ) {
-    await interaction.reply("delete a sender channel");
+    if (!interaction.guildId) {
+      return await interaction.reply("failed: guild not found");
+    }
+
+    const channels = await getSendChannels(interaction, "");
+    if (channels.findIndex((c) => c.id === channel) === -1) {
+      return await interaction.reply("failed: channel not found");
+    }
+
+    try {
+      await deleteSenderChannel(interaction.guildId, channel);
+      await interaction.reply(`deleted sender channel <#${channel}>`);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          return await interaction.reply("failed: channel not found");
+        }
+      } else {
+        console.error(error);
+        return await interaction.reply("failed: unknown error");
+      }
+    }
   }
 }
