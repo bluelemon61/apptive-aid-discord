@@ -3,15 +3,32 @@ import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
   Interaction,
+  TextChannel,
 } from "discord.js";
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { deleteSenderChannel, getSenderChannels } from "@/db/queries/sender";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import prisma from "@/utilities/prisma";
 
 async function getSendChannels(interaction: Interaction, query: string = "") {
-  const channels = await getSenderChannels(interaction.guildId!, interaction);
+  if (!interaction.guild) return [];
 
-  return channels.filter((channel) => channel.name.includes(query));
+  const allChannels = Array.from(await interaction.guild.channels.fetch())
+    .map(([, channel]) => channel)
+    .filter((channel) => channel instanceof TextChannel);
+
+  const registeredChannelIds = (
+    await prisma.sendChannel.findMany({
+      where: { serverId: interaction.guildId! },
+    })
+  ).map((channel) => channel.channelId);
+
+  return allChannels
+    .filter((channel) =>
+      registeredChannelIds.some(
+        (registeredChannelId) => registeredChannelId === channel.id
+      )
+    )
+    .filter((channel) => channel.name.includes(query));
 }
 
 async function getOptions(interaction: AutocompleteInteraction) {
@@ -22,7 +39,7 @@ async function getOptions(interaction: AutocompleteInteraction) {
   return interaction.respond(
     (await getSendChannels(interaction, input))
       .map((channel) => ({
-        name: channel.name,
+        name: `# ${channel.name}`,
         value: channel.id,
       }))
       .slice(0, 25)
@@ -54,7 +71,12 @@ export class Sender {
     }
 
     try {
-      await deleteSenderChannel(interaction.guildId, channel);
+      await prisma.sendChannel.deleteMany({
+        where: {
+          serverId: interaction.guildId!,
+          channelId: channel,
+        },
+      });
       await interaction.reply(`deleted sender channel <#${channel}>`);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {

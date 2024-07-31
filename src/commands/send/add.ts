@@ -7,10 +7,16 @@ import {
 } from "discord.js";
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { addSendrerChannel, getSenderChannelIds } from "@/db/queries/sender";
+import prisma from "@/utilities/prisma";
 
 async function getTextChannels(interaction: Interaction, query: string = "") {
-  const registeredChannelIds = await getSenderChannelIds(interaction.guildId!);
+  if (!interaction.guild) return [];
+
+  const registeredChannelIds = (
+    await prisma.sendChannel.findMany({
+      where: { serverId: interaction.guildId! },
+    })
+  ).map((channel) => channel.channelId);
 
   return Array.from(await interaction.guild!.channels.fetch())
     .map(([, channel]) => channel)
@@ -27,7 +33,7 @@ async function getOptions(interaction: AutocompleteInteraction) {
 
   return interaction.respond(
     textChannels.map((channel) => ({
-      name: channel.name,
+      name: `# ${channel.name}`,
       value: channel.id,
     }))
   );
@@ -62,7 +68,17 @@ export class Sender {
     }
 
     try {
-      await addSendrerChannel(interaction.guildId, channel);
+      await prisma.sendChannel.create({
+        data: {
+          channelId: channel,
+          server: {
+            connectOrCreate: {
+              where: { id: interaction.guildId },
+              create: { id: interaction.guildId },
+            },
+          },
+        },
+      });
       await interaction.reply(`added sender channel <#${channel}>`);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
