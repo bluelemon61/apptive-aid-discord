@@ -16,7 +16,7 @@ model Server {
 
 model SendChannel {
   id              Int          @id @default(autoincrement())
-  channelId       String
+  channelId       String       @unique
   serverId        String
   
   receiveChannels SendToReceive[]
@@ -26,7 +26,7 @@ model SendChannel {
 
 model ReceiveChannel {
   id            Int            @id @default(autoincrement())
-  channelId     String
+  channelId     String         @unique
   serverId      String
 
   sendChannels  SendToReceive[]
