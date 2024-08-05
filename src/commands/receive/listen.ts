@@ -186,7 +186,7 @@ export class Receiver {
           },
         });
       }
-      await interaction.reply(`added receiver channel <#${from}>`);
+      await interaction.reply(`added receiver channel <#${from}> -> <#${receiverId}>`);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
