@@ -9,6 +9,13 @@ import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import prisma from "@/utilities/prisma";
 
+/**
+ * Returns the all of this server's channel list
+ * 
+ * @param interaction 
+ * @param query - Channel name to find. Default is ""
+ * @returns Array of channels
+ */
 async function getTextChannels(interaction: Interaction, query: string = "") {
   if (!interaction.guild) return [];
 
@@ -25,6 +32,12 @@ async function getTextChannels(interaction: Interaction, query: string = "") {
     .filter((channel) => !registeredChannelIds.includes(channel.id));
 }
 
+/**
+ * Returns the all channel list by option form
+ * 
+ * @param interaction 
+ * @returns Array of channels by option form
+ */
 async function getOptions(interaction: AutocompleteInteraction) {
   if (!interaction.guild) return;
 
@@ -68,6 +81,21 @@ export class Sender {
     }
 
     try {
+      /** 
+       * 아래와 같은 상황일 때 무한 반복 방지
+       * 송신 -> 수신
+       * A -> B, B -> C, C -> A
+       */
+      const isReceiver = await prisma.receiveChannel.findUnique({
+        where: {
+          channelId: channel,
+        },
+      });
+
+      if (isReceiver) {
+        return await interaction.reply("failed: receiver channel can't be sender");
+      }
+
       await prisma.sendChannel.create({
         data: {
           channelId: channel,

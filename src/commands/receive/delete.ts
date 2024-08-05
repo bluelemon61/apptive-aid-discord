@@ -9,6 +9,13 @@ import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import prisma from "@/utilities/prisma";
 
+/**
+ * Returns the all of this server's receiver channel list
+ * 
+ * @param interaction 
+ * @param query - Channel name to find. Default is ""
+ * @returns Array of receiver channels
+ */
 async function getReceiveChannels(interaction: Interaction, query: string = "") {
   if (!interaction.guild) return [];
 
@@ -31,6 +38,12 @@ async function getReceiveChannels(interaction: Interaction, query: string = "") 
     .filter((channel) => channel.name.includes(query));
 }
 
+/**
+ * Returns the all receiver channel list by option form
+ * 
+ * @param interaction 
+ * @returns Array of receiver channels by option form
+ */
 async function getOptions(interaction: AutocompleteInteraction) {
   if (!interaction.guild) return;
 

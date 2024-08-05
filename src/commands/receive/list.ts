@@ -9,7 +9,7 @@ export class Recevier {
   async list(interaction: ChatInputCommandInteraction) {
     if (!interaction.guildId) return;
 
-    // 디스코드 서버에 등록된 모든 채널 조회
+    // 디스코드 서버에 등록된 모든 수신 채널 조회
     const allChannels = Array.from(
       await interaction.guild!.channels.fetch()
     ).map(([, channel]) => channel);
