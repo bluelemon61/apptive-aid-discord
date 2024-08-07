@@ -10,13 +10,13 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import prisma from "@/utilities/prisma";
 
 /**
- * Returns the all of this server's sender channel list
+ * Returns the all of this server's receiver channel list
  * 
  * @param interaction 
  * @param query - Channel name to find. Default is ""
- * @returns Array of sender channels
+ * @returns Array of receiver channels
  */
-async function getSendChannels(interaction: Interaction, query: string = "") {
+async function getReceiveChannels(interaction: Interaction, query: string = "") {
   if (!interaction.guild) return [];
 
   const allChannels = Array.from(await interaction.guild.channels.fetch())
@@ -24,7 +24,7 @@ async function getSendChannels(interaction: Interaction, query: string = "") {
     .filter((channel) => channel instanceof TextChannel);
 
   const registeredChannelIds = (
-    await prisma.sendChannel.findMany({
+    await prisma.receiveChannel.findMany({
       where: { serverId: interaction.guildId! },
     })
   ).map((channel) => channel.channelId);
@@ -39,10 +39,10 @@ async function getSendChannels(interaction: Interaction, query: string = "") {
 }
 
 /**
- * Returns the all sender channel list by option form
+ * Returns the all receiver channel list by option form
  * 
  * @param interaction 
- * @returns Array of sender channels by option form
+ * @returns Array of receiver channels by option form
  */
 async function getOptions(interaction: AutocompleteInteraction) {
   if (!interaction.guild) return;
@@ -50,7 +50,7 @@ async function getOptions(interaction: AutocompleteInteraction) {
   const input = interaction.options.getString("channel") || "";
 
   return interaction.respond(
-    (await getSendChannels(interaction, input))
+    (await getReceiveChannels(interaction, input))
       .map((channel) => ({
         name: `# ${channel.name}`,
         value: channel.id,
@@ -60,13 +60,13 @@ async function getOptions(interaction: AutocompleteInteraction) {
 }
 
 @Discord()
-@SlashGroup("sender")
-export class Sender {
-  @Slash({ name: "delete", description: "delete a sender channel" })
+@SlashGroup("receiver")
+export class Receiver {
+  @Slash({ name: "delete", description: "delete a receiver channel" })
   async delete(
     @SlashOption({
       name: "channel",
-      description: "the channel to delete as a sender",
+      description: "the channel to delete as a receiver",
       required: true,
       type: ApplicationCommandOptionType.String,
       autocomplete: getOptions,
@@ -78,19 +78,19 @@ export class Sender {
       return await interaction.reply("failed: guild not found");
     }
 
-    const channels = await getSendChannels(interaction, "");
+    const channels = await getReceiveChannels(interaction, "");
     if (channels.findIndex((c) => c.id === channel) === -1) {
       return await interaction.reply("failed: channel not found");
     }
 
     try {
-      await prisma.sendChannel.deleteMany({
+      await prisma.receiveChannel.deleteMany({
         where: {
           serverId: interaction.guildId!,
           channelId: channel,
         },
       });
-      await interaction.reply(`deleted sender channel <#${channel}>`);
+      await interaction.reply(`deleted receiver channel <#${channel}>`);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
