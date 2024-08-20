@@ -9,11 +9,10 @@ import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import prisma from "@/utilities/prisma";
 
-
 /**
  * Returns the all sender channel list
- * 
- * @param interaction 
+ *
+ * @param interaction
  * @param query - Channel name to find. Default is ""
  * @returns Array of sender channels
  */
@@ -27,27 +26,32 @@ async function getSenderChannels(interaction: Interaction, query: string = "") {
     },
   });
 
-  return (await Promise.all(
-    registeredChannels.map(async (channel) => {
-      return await interaction.client.channels.fetch(channel.id)
-    })
-  ))
+  return (
+    await Promise.all(
+      registeredChannels.map(async (channel) => {
+        return await interaction.client.channels.fetch(channel.id);
+      })
+    )
+  )
     .filter((channel) => channel !== null)
     .filter((channel) => channel instanceof TextChannel)
-    .filter((channel) => channel.name.includes(query))
+    .filter((channel) => channel.name.includes(query));
 }
 
 /**
  * Returns the all sender channel list by option form
- * 
- * @param interaction 
+ *
+ * @param interaction
  * @returns Array of sender channels by option form
  */
 async function getSenderOptions(interaction: AutocompleteInteraction) {
   if (!interaction.guild) return;
 
   const input = interaction.options.getString("channel") || "";
-  const textChannels = (await getSenderChannels(interaction, input)).slice(0, 25);
+  const textChannels = (await getSenderChannels(interaction, input)).slice(
+    0,
+    25
+  );
 
   return interaction.respond(
     textChannels.map((channel) => ({
@@ -57,12 +61,10 @@ async function getSenderOptions(interaction: AutocompleteInteraction) {
   );
 }
 
-
-
 /**
  * Returns the all of this server's channel list
- * 
- * @param interaction 
+ *
+ * @param interaction
  * @param query - Channel name to find. Default is ""
  * @returns Array of channels˃
  */
@@ -77,8 +79,8 @@ async function getTextChannels(interaction: Interaction, query: string = "") {
 
 /**
  * Returns the all channel list by option form
- * 
- * @param interaction 
+ *
+ * @param interaction
  * @returns Array of channels by option form
  */
 async function getTextChannelOptions(interaction: AutocompleteInteraction) {
@@ -131,10 +133,11 @@ export class Receiver {
       return await interaction.reply("failed: sender channel not found");
     }
 
-    const receiverId = to ? to : interaction.channelId;``
+    const receiverId = to ? to : interaction.channelId;
+    ``;
 
     try {
-      /** 
+      /**
        * 아래와 같은 상황일 때 무한 반복 방지
        * 송신 -> 수신
        * A -> B, B -> C, C -> A
@@ -146,34 +149,42 @@ export class Receiver {
       });
 
       if (isSender) {
-        return await interaction.reply("failed: sender channel can't be receiver");
+        return await interaction.reply(
+          "failed: sender channel can't be receiver"
+        );
       }
 
       await prisma.sendToReceive.create({
         data: {
           sendChannel: {
             connect: {
-              id: from
-            }
+              id: from,
+            },
           },
           receiveChannel: {
             connectOrCreate: {
               where: { id: receiverId },
-              create: { 
+              create: {
                 id: receiverId,
                 server: {
                   connectOrCreate: {
                     where: { id: interaction.guildId },
                     create: { id: interaction.guildId },
-                  }
-                }
-              }
-            }
-          }
-        }
-      })
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
 
-      await interaction.reply(`added receiver channel <#${from}> → <#${receiverId}>`);
+      const fromChannel = (await interaction.client.channels.fetch(
+        from
+      )) as TextChannel;
+
+      await interaction.reply(
+        `set receiver channel \`${fromChannel.guild.name} > ${fromChannel.name}\` → <#${receiverId}>`
+      );
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {

@@ -178,8 +178,12 @@ export class Receiver {
         },
       });
 
+      const fromChannel = (await interaction.client.channels.fetch(
+        from
+      )) as TextChannel;
+
       await interaction.reply(
-        `deleted a send channel from receive channel <#${to}>`
+        `deleted sender channel \`${fromChannel.guild.name} > ${fromChannel.name}\` from receiver channel <#${to}>`
       );
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
