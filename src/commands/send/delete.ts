@@ -27,7 +27,7 @@ async function getSendChannels(interaction: Interaction, query: string = "") {
     await prisma.sendChannel.findMany({
       where: { serverId: interaction.guildId! },
     })
-  ).map((channel) => channel.channelId);
+  ).map((channel) => channel.id);
 
   return allChannels
     .filter((channel) =>
@@ -84,10 +84,10 @@ export class Sender {
     }
 
     try {
-      await prisma.sendChannel.deleteMany({
+      await prisma.sendChannel.delete({
         where: {
           serverId: interaction.guildId!,
-          channelId: channel,
+          id: channel,
         },
       });
       await interaction.reply(`deleted sender channel <#${channel}>`);

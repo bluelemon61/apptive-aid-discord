@@ -23,7 +23,7 @@ async function getTextChannels(interaction: Interaction, query: string = "") {
     await prisma.sendChannel.findMany({
       where: { serverId: interaction.guildId! },
     })
-  ).map((channel) => channel.channelId);
+  ).map((channel) => channel.id);
 
   return Array.from(await interaction.guild!.channels.fetch())
     .map(([, channel]) => channel)
@@ -88,7 +88,7 @@ export class Sender {
        */
       const isReceiver = await prisma.receiveChannel.findUnique({
         where: {
-          channelId: channel,
+          id: channel,
         },
       });
 
@@ -98,7 +98,7 @@ export class Sender {
 
       await prisma.sendChannel.create({
         data: {
-          channelId: channel,
+          id: channel,
           server: {
             connectOrCreate: {
               where: { id: interaction.guildId },

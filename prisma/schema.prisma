@@ -15,8 +15,7 @@ model Server {
 }
 
 model SendChannel {
-  id              Int          @id @default(autoincrement())
-  channelId       String       @unique
+  id              String          @id
   serverId        String
   
   receiveChannels SendToReceive[]
@@ -25,18 +24,17 @@ model SendChannel {
 }
 
 model ReceiveChannel {
-  id            Int            @id @default(autoincrement())
-  channelId     String         @unique
-  serverId      String
+  id              String          @id
+  serverId        String
 
-  sendChannels  SendToReceive[]
+  sendChannels    SendToReceive[]
 
-  server        Server          @relation(fields: [serverId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  server          Server          @relation(fields: [serverId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model SendToReceive {
-  sendChannelId       Int
-  receiveChannelId    Int
+  sendChannelId       String
+  receiveChannelId    String
 
   sendChannel         SendChannel     @relation(fields: [sendChannelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   receiveChannel      ReceiveChannel  @relation(fields: [receiveChannelId], references: [id], onDelete: Cascade, onUpdate: Cascade)

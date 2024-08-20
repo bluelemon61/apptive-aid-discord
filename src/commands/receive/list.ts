@@ -18,7 +18,7 @@ export class Recevier {
     const registeredChannels = await prisma.receiveChannel.findMany({
       where: { serverId: interaction.guildId },
       select: {
-        channelId: true,
+        id: true,
         sendChannels: {
           select: {
             sendChannelId: true,
@@ -31,7 +31,7 @@ export class Recevier {
     const channels = registeredChannels.reduce(
       (acc, receiveChannel) => {
         const channel = allChannels.find(
-          (c) => c?.id === receiveChannel.channelId
+          (c) => c?.id === receiveChannel.id
         );
 
         if (channel instanceof TextChannel) {

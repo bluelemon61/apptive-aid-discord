@@ -23,13 +23,13 @@ async function getSenderChannels(interaction: Interaction, query: string = "") {
   // DB에 등록된 채널 조회
   const registeredChannels = await prisma.sendChannel.findMany({
     select: {
-      channelId: true,
+      id: true,
     },
   });
 
   return (await Promise.all(
     registeredChannels.map(async (channel) => {
-      return await interaction.client.channels.fetch(channel.channelId);
+      return await interaction.client.channels.fetch(channel.id)
     })
   ))
     .filter((channel) => channel !== null)
@@ -51,7 +51,7 @@ async function getSenderOptions(interaction: AutocompleteInteraction) {
 
   return interaction.respond(
     textChannels.map((channel) => ({
-      name: `# ${channel.name}`,
+      name: `${channel.guild.name} > # ${channel.name}`,
       value: channel.id,
     }))
   );
@@ -64,7 +64,7 @@ async function getSenderOptions(interaction: AutocompleteInteraction) {
  * 
  * @param interaction 
  * @param query - Channel name to find. Default is ""
- * @returns Array of channels
+ * @returns Array of channels˃
  */
 async function getTextChannels(interaction: Interaction, query: string = "") {
   if (!interaction.guild) return [];
@@ -131,7 +131,7 @@ export class Receiver {
       return await interaction.reply("failed: sender channel not found");
     }
 
-    const receiverId = to ? to : interaction.channelId;
+    const receiverId = to ? to : interaction.channelId;``
 
     try {
       /** 
@@ -141,7 +141,7 @@ export class Receiver {
        */
       const isSender = await prisma.sendChannel.findUnique({
         where: {
-          channelId: receiverId,
+          id: receiverId,
         },
       });
 
@@ -149,44 +149,31 @@ export class Receiver {
         return await interaction.reply("failed: sender channel can't be receiver");
       }
 
-      const existingChannel = await prisma.receiveChannel.findUnique({
-        where: {
-          channelId: receiverId,
-        },
-      });
+      await prisma.sendToReceive.create({
+        data: {
+          sendChannel: {
+            connect: {
+              id: from
+            }
+          },
+          receiveChannel: {
+            connectOrCreate: {
+              where: { id: receiverId },
+              create: { 
+                id: receiverId,
+                server: {
+                  connectOrCreate: {
+                    where: { id: interaction.guildId },
+                    create: { id: interaction.guildId },
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
 
-      if (existingChannel) {
-        await prisma.sendToReceive.create({
-          data: {
-            sendChannel: {
-              connect: { channelId: from },
-            },
-            receiveChannel: {
-              connect: { channelId: receiverId },
-            },
-          },
-        });
-      } else {
-        await prisma.receiveChannel.create({
-          data: {
-            channelId: receiverId,
-            server: {
-              connectOrCreate: {
-                where: { id: interaction.guildId },
-                create: { id: interaction.guildId },
-              },
-            },
-            sendChannels: {
-              create: {
-                sendChannel: {
-                  connect: { channelId: from },
-                },
-              },
-            },
-          },
-        });
-      }
-      await interaction.reply(`added receiver channel <#${from}> -> <#${receiverId}>`);
+      await interaction.reply(`added receiver channel <#${from}> → <#${receiverId}>`);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {

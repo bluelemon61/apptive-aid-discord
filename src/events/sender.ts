@@ -10,13 +10,13 @@ export class Sender {
     if (!message.guild) return;
 
     const sendChannel = await prisma.sendChannel.findMany({
-      where: { channelId: message.channel.id, serverId: message.guild!.id },
+      where: { id: message.channel.id, serverId: message.guild!.id },
       select: {
         receiveChannels: {
           select: {
             receiveChannel: {
               select: {
-                channelId: true,
+                id: true,
                 serverId: true,
               },
             },
@@ -37,19 +37,19 @@ export class Sender {
     
     receiveChannels.forEach(async (receiveChannel) => {
       try {
-        const channel = await client.channels.fetch(receiveChannel.channelId);
+        const channel = await client.channels.fetch(receiveChannel.id);
 
         if (channel == null) {
           // 채널이 없으면 삭제 (채널 삭제 시 봇이 삭제 이벤트에 일일이 대응하기 힘듬)
           await prisma.receiveChannel.deleteMany({
             where: {
-              channelId: receiveChannel.channelId,
+              id: receiveChannel.id,
               serverId: receiveChannel.serverId,
             },
           });
-        } else if (channel instanceof TextChannel) {
+        } else if (channel instanceof TextChannel && message.channel instanceof TextChannel) {
           /* const result = */ await channel.send({
-            content: `${message.content}\n\nfrom \`${message.guild!.name}\``,
+            content: `${message.content}\n\nfrom **${message.guild?.name}**`,
             files: message.attachments.map((attachment) => attachment.url),
             embeds: message.embeds,
             components: message.components,

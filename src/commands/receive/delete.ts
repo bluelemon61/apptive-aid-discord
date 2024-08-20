@@ -27,7 +27,7 @@ async function getReceiveChannels(interaction: Interaction, query: string = "") 
     await prisma.receiveChannel.findMany({
       where: { serverId: interaction.guildId! },
     })
-  ).map((channel) => channel.channelId);
+  ).map((channel) => channel.id);
 
   return allChannels
     .filter((channel) =>
@@ -84,10 +84,10 @@ export class Receiver {
     }
 
     try {
-      await prisma.receiveChannel.deleteMany({
+      await prisma.receiveChannel.delete({
         where: {
+          id: channel,
           serverId: interaction.guildId!,
-          channelId: channel,
         },
       });
       await interaction.reply(`deleted receiver channel <#${channel}>`);
