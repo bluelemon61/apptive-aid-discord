@@ -8,6 +8,8 @@ import {
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import prisma from "@/utilities/prisma";
+import L from "@/locales/i18n-node";
+import { getPreferredLocale } from "@/utilities/localized";
 
 /**
  * Returns the all sender channel list
@@ -101,14 +103,29 @@ async function getTextChannelOptions(interaction: AutocompleteInteraction) {
 @SlashGroup({
   name: "receiver",
   description: "listen, list, and delete receiver channels",
+  descriptionLocalizations: {
+    ko: "수신 채널을 관리합니다.",
+  },
 })
 @SlashGroup("receiver")
 export class Receiver {
-  @Slash({ name: "listen", description: "Listen from sender channel" })
+  @Slash({
+    name: "listen",
+    description: "Listen from sender channel",
+    descriptionLocalizations: {
+      ko: "송신 채널로부터 메시지를 수신합니다",
+    },
+  })
   async add(
     @SlashOption({
       name: "from",
       description: "The sender channel to listen",
+      nameLocalizations: {
+        ko: "송신채널",
+      },
+      descriptionLocalizations: {
+        ko: "메시지를 전송할 채널",
+      },
       required: true,
       type: ApplicationCommandOptionType.String,
       autocomplete: getSenderOptions,
@@ -117,6 +134,12 @@ export class Receiver {
     @SlashOption({
       name: "to",
       description: "The receiver channel | Default: this channel",
+      nameLocalizations: {
+        ko: "수신채널",
+      },
+      descriptionLocalizations: {
+        ko: "메시지를 수신받을 채널",
+      },
       required: false,
       type: ApplicationCommandOptionType.String,
       autocomplete: getTextChannelOptions,
@@ -124,13 +147,17 @@ export class Receiver {
     to: string,
     interaction: ChatInputCommandInteraction
   ) {
+    const LL = L[getPreferredLocale(interaction)];
+
     if (!interaction.guildId) {
-      return await interaction.reply("failed: guild not found");
+      return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
     const senderChannels = await getSenderChannels(interaction, "");
     if (senderChannels.findIndex((c) => c.id === from) === -1) {
-      return await interaction.reply("failed: sender channel not found");
+      return await interaction.reply(
+        LL.RECEIVER_LISTEN_ERROR_SENDER_NOT_FOUND()
+      );
     }
 
     const receiverId = to ? to : interaction.channelId;
@@ -150,7 +177,7 @@ export class Receiver {
 
       if (isSender) {
         return await interaction.reply(
-          "failed: sender channel can't be receiver"
+          LL.RECEIVER_LISTEN_ERROR_SENDER_CONFLICT()
         );
       }
 
@@ -183,16 +210,20 @@ export class Receiver {
       )) as TextChannel;
 
       await interaction.reply(
-        `set receiver channel \`${fromChannel.guild.name} > ${fromChannel.name}\` → <#${receiverId}>`
+        LL.RECEIVER_LISTEN_SUCCESS({
+          from_channel: fromChannel.name,
+          from_guild: fromChannel.guild.name,
+          to: receiverId,
+        })
       );
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
-          return await interaction.reply("failed: channel already exists");
+          return await interaction.reply(LL.RECEIVER_LISTEN_ERROR_ALREADY_EXISTS());
         }
       } else {
         console.error(error);
-        return await interaction.reply("failed: unknown error");
+        return await interaction.reply(LL.ERROR_UNKNOWN());
       }
     }
   }
