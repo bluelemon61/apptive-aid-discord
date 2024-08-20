@@ -8,6 +8,8 @@ import {
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import prisma from "@/utilities/prisma";
+import { getPreferredLocale } from "@/utilities/localized";
+import L from "@/locales/i18n-node";
 
 /**
  * Returns the all of this server's sender channel list
@@ -62,11 +64,24 @@ async function getOptions(interaction: AutocompleteInteraction) {
 @Discord()
 @SlashGroup("sender")
 export class Sender {
-  @Slash({ name: "delete", description: "delete a sender channel" })
+  @Slash({ 
+    name: "delete",
+    description: "delete a sender channel",
+    descriptionLocalizations: {
+      ko: "송신 채널을 삭제합니다",
+    }
+  })
   async delete(
     @SlashOption({
       name: "channel",
       description: "the channel to delete as a sender",
+      nameLocalizations: {
+        ko: "채널",
+      },
+      descriptionLocalizations: {
+        ko: "삭제할 송신 채널",
+      },
+
       required: true,
       type: ApplicationCommandOptionType.String,
       autocomplete: getOptions,
@@ -74,13 +89,15 @@ export class Sender {
     channel: string,
     interaction: ChatInputCommandInteraction
   ) {
+    const LL = L[getPreferredLocale(interaction)];
+
     if (!interaction.guildId) {
-      return await interaction.reply("failed: guild not found");
+      return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
     const channels = await getSendChannels(interaction, "");
     if (channels.findIndex((c) => c.id === channel) === -1) {
-      return await interaction.reply("failed: channel not found");
+      return await interaction.reply(LL.ERROR_CHANNEL_NOT_FOUND());
     }
 
     try {
@@ -90,15 +107,15 @@ export class Sender {
           id: channel,
         },
       });
-      await interaction.reply(`deleted sender channel <#${channel}>`);
+      await interaction.reply(LL.SENDER_DELETE_SUCCESS({channel}));
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
-          return await interaction.reply("failed: channel not found");
+          return await interaction.reply(LL.ERROR_CHANNEL_NOT_FOUND());
         }
       } else {
         console.error(error);
-        return await interaction.reply("failed: unknown error");
+        return await interaction.reply(LL.ERROR_UNKNOWN());
       }
     }
   }
