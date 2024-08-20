@@ -14,6 +14,9 @@ RUN corepack enable && yarn
 COPY src ./src
 COPY tsconfig.json   .
 
+# Migrate DB
+RUN yarn prisma migrate deploy
+
 # Build project
 RUN yarn build
 
