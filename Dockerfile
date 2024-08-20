@@ -8,14 +8,14 @@ WORKDIR /tmp/app
 COPY package.json .
 
 # Install dependencies
-RUN npm install
+RUN corepack enable && yarn
 
 # Move source files
 COPY src ./src
 COPY tsconfig.json   .
 
 # Build project
-RUN npm run build
+RUN yarn build
 
 ## production runner
 FROM node:lts-alpine as prod-runner

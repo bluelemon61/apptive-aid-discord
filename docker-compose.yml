@@ -4,4 +4,12 @@ services:
     build: .
     command: node build/main.js
     environment:
-      - BOT_TOKEN=${BOT_TOKEN}
+      - DISCORD_TOKEN=${BOT_TOKEN}
+      - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
