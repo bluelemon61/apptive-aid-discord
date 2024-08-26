@@ -14,8 +14,9 @@ RUN corepack enable && yarn
 COPY src ./src
 COPY tsconfig.json   .
 
-# Migrate DB
-RUN yarn prisma migrate deploy
+# Generate DB
+COPY prisma ./prisma
+RUN yarn prisma generate
 
 # Build project
 RUN yarn build
@@ -30,10 +31,14 @@ WORKDIR /app
 COPY --from=build-runner /tmp/app/package.json /app/package.json
 
 # Install dependencies
-RUN npm install --omit=dev
+RUN yarn install --production
 
 # Move build files
 COPY --from=build-runner /tmp/app/build /app/build
+COPY --from=build-runner /tmp/app/prisma /app/prisma
+
+# generate db
+RUN npx prisma generate
 
 # Start bot
-CMD [ "npm", "run", "start" ]
+CMD [ "yarn", "start" ]

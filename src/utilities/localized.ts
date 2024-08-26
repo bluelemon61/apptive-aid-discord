@@ -1,5 +1,5 @@
-import { Locales } from "@/locales/i18n-types";
-import { baseLocale, loadedLocales } from '@/locales/i18n-util';
+import { Locales } from "../locales/i18n-types";
+import { baseLocale, loadedLocales } from '../locales/i18n-util';
 import { Interaction } from "discord.js";
 
 export function getPreferredLocale(interaction: Interaction) {

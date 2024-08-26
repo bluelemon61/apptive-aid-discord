@@ -7,12 +7,7 @@
     "strict": true,
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
-
-    "baseUrl": "src",
-    "paths": {
-      "@/*": ["*"]
-    },
-
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": false,
 

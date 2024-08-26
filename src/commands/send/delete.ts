@@ -7,9 +7,9 @@ import {
 } from "discord.js";
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import prisma from "@/utilities/prisma";
-import { getPreferredLocale } from "@/utilities/localized";
-import L from "@/locales/i18n-node";
+import prisma from "../../utilities/prisma";
+import { getPreferredLocale } from "../../utilities/localized";
+import L from "../../locales/i18n-node";
 
 /**
  * Returns the all of this server's sender channel list

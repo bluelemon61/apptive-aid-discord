@@ -1,12 +1,14 @@
-version: "3"
 services:
   app:
+    container_name: apptive-aid-discord-app
+    depends_on:
+      - db
     build: .
-    command: node build/main.js
     environment:
       - DISCORD_TOKEN=${BOT_TOKEN}
       - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}
   db:
+    container_name: apptive-aid-discord-db
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}

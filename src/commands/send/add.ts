@@ -7,9 +7,9 @@ import {
 } from "discord.js";
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import prisma from "@/utilities/prisma";
-import L from "@/locales/i18n-node";
-import { getPreferredLocale } from "@/utilities/localized";
+import prisma from "../../utilities/prisma";
+import L from "../../locales/i18n-node";
+import { getPreferredLocale } from "../../utilities/localized";
 
 /**
  * Returns the all of this server's channel list

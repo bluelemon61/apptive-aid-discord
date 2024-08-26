@@ -1,6 +1,6 @@
-import L from "@/locales/i18n-node";
-import { getPreferredLocale } from "@/utilities/localized";
-import prisma from "@/utilities/prisma";
+import L from "../../locales/i18n-node";
+import { getPreferredLocale } from "../../utilities/localized";
+import prisma from "../../utilities/prisma";
 import { ChatInputCommandInteraction, TextChannel } from "discord.js";
 import { Discord, Slash, SlashGroup } from "discordx";
 

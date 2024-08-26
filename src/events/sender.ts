@@ -1,4 +1,4 @@
-import prisma from "@/utilities/prisma";
+import prisma from "../utilities/prisma";
 import { TextChannel } from "discord.js";
 import type { ArgsOf, Client } from "discordx";
 import { Discord, On } from "discordx";
