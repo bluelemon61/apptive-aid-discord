@@ -1,6 +1,7 @@
 services:
   app:
     container_name: apptive-aid-discord-app
+    restart: unless-stopped
     depends_on:
       - db
     build: .
@@ -9,6 +10,7 @@ services:
       - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}
   db:
     container_name: apptive-aid-discord-db
+    restart: unless-stopped
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
