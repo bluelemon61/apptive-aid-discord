@@ -21,6 +21,8 @@ export class Sender {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
+    interaction.deferReply();
+
     // 디스코드 서버에 등록된 모든 채널 조회
     const allChannels = Array.from(
       await interaction.guild!.channels.fetch()
@@ -60,11 +62,11 @@ export class Sender {
 
     // 빈 임베드를 보내지 않기 위함
     if (channels.length === 0) {
-      await interaction.reply(LL.SENDER_LIST_SUCCESS_EMPTY());
+      await interaction.editReply(LL.SENDER_LIST_SUCCESS_EMPTY());
       return;
     }
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         {
           author: {

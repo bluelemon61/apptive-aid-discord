@@ -178,14 +178,16 @@ export class Receiver {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
+    interaction.deferReply();
+
     const receiveChannels = await getReceiveChannels(interaction, "");
     if (receiveChannels.findIndex((c) => c.id === to) === -1) {
-      return await interaction.reply(LL.RECEIVER_UNLISTEN_ERROR_RECEIVER_NOT_FOUND());
+      return await interaction.editReply(LL.RECEIVER_UNLISTEN_ERROR_RECEIVER_NOT_FOUND());
     }
 
     const senderChannels = await getSenderChannels(interaction, "", to);
     if (senderChannels.findIndex((c) => c.id === from) === -1) {
-      return await interaction.reply(LL.RECEIVER_UNLISTEN_ERROR_SENDER_NOT_FOUND());
+      return await interaction.editReply(LL.RECEIVER_UNLISTEN_ERROR_SENDER_NOT_FOUND());
     }
 
     try {
@@ -201,7 +203,7 @@ export class Receiver {
         from
       )) as TextChannel;
 
-      await interaction.reply(LL.RECEIVER_UNLISTEN_SUCCESS({
+      await interaction.editReply(LL.RECEIVER_UNLISTEN_SUCCESS({
         from_guild: fromChannel.guild.name,
         from_channel: fromChannel.name,
         to
@@ -209,11 +211,11 @@ export class Receiver {
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
-          return await interaction.reply(LL.ERROR_CHANNEL_NOT_FOUND());
+          return await interaction.editReply(LL.ERROR_CHANNEL_NOT_FOUND());
         }
       } else {
         console.error(error);
-        return await interaction.reply(LL.ERROR_UNKNOWN());
+        return await interaction.editReply(LL.ERROR_UNKNOWN());
       }
     }
   }

@@ -153,9 +153,11 @@ export class Receiver {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
+    interaction.deferReply();
+
     const senderChannels = await getSenderChannels(interaction, "");
     if (senderChannels.findIndex((c) => c.id === from) === -1) {
-      return await interaction.reply(
+      return await interaction.editReply(
         LL.RECEIVER_LISTEN_ERROR_SENDER_NOT_FOUND()
       );
     }
@@ -176,7 +178,7 @@ export class Receiver {
       });
 
       if (isSender) {
-        return await interaction.reply(
+        return await interaction.editReply(
           LL.RECEIVER_LISTEN_ERROR_SENDER_CONFLICT()
         );
       }
@@ -209,7 +211,7 @@ export class Receiver {
         from
       )) as TextChannel;
 
-      await interaction.reply(
+      await interaction.editReply(
         LL.RECEIVER_LISTEN_SUCCESS({
           from_channel: fromChannel.name,
           from_guild: fromChannel.guild.name,
@@ -219,11 +221,11 @@ export class Receiver {
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
-          return await interaction.reply(LL.RECEIVER_LISTEN_ERROR_ALREADY_EXISTS());
+          return await interaction.editReply(LL.RECEIVER_LISTEN_ERROR_ALREADY_EXISTS());
         }
       } else {
         console.error(error);
-        return await interaction.reply(LL.ERROR_UNKNOWN());
+        return await interaction.editReply(LL.ERROR_UNKNOWN());
       }
     }
   }

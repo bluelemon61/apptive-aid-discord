@@ -95,9 +95,11 @@ export class Sender {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
+    interaction.deferReply();
+
     const textChannels = await getTextChannels(interaction, "");
     if (textChannels.findIndex((c) => c.id === channel) === -1) {
-      return await interaction.reply(LL.ERROR_CHANNEL_NOT_FOUND());
+      return await interaction.editReply(LL.ERROR_CHANNEL_NOT_FOUND());
     }
 
     try {
@@ -113,7 +115,7 @@ export class Sender {
       });
 
       if (isReceiver) {
-        return await interaction.reply(LL.SENDER_ADD_ERROR_RECEIVER_CONFLICT());
+        return await interaction.editReply(LL.SENDER_ADD_ERROR_RECEIVER_CONFLICT());
       }
 
       await prisma.sendChannel.create({
@@ -127,15 +129,15 @@ export class Sender {
           },
         },
       });
-      await interaction.reply(LL.SENDER_ADD_SUCCESS({channel}));
+      await interaction.editReply(LL.SENDER_ADD_SUCCESS({channel}));
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
-          return await interaction.reply(LL.SENDER_ADD_ERROR_ALREADY_EXISTS());
+          return await interaction.editReply(LL.SENDER_ADD_ERROR_ALREADY_EXISTS());
         }
       } else {
         console.error(error);
-        return await interaction.reply(LL.ERROR_UNKNOWN());
+        return await interaction.editReply(LL.ERROR_UNKNOWN());
       }
     }
   }

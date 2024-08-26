@@ -17,10 +17,11 @@ export class Recevier {
   async list(interaction: ChatInputCommandInteraction) {
     const LL = L[getPreferredLocale(interaction)];
 
-
     if (!interaction.guildId) {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
+
+    interaction.deferReply();
 
     // 디스코드 서버에 등록된 모든 수신 채널 조회
     const allChannels = Array.from(
@@ -61,11 +62,11 @@ export class Recevier {
 
     // 빈 임베드를 보내지 않기 위함
     if (channels.length === 0) {
-      await interaction.reply(LL.RECEIVER_LIST_SUCCESS_EMPTY());
+      await interaction.editReply(LL.RECEIVER_LIST_SUCCESS_EMPTY());
       return;
     }
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         {
           author: {

@@ -95,9 +95,11 @@ export class Sender {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
+    interaction.deferReply();
+
     const channels = await getSendChannels(interaction, "");
     if (channels.findIndex((c) => c.id === channel) === -1) {
-      return await interaction.reply(LL.ERROR_CHANNEL_NOT_FOUND());
+      return await interaction.editReply(LL.ERROR_CHANNEL_NOT_FOUND());
     }
 
     try {
@@ -107,15 +109,15 @@ export class Sender {
           id: channel,
         },
       });
-      await interaction.reply(LL.SENDER_DELETE_SUCCESS({channel}));
+      await interaction.editReply(LL.SENDER_DELETE_SUCCESS({channel}));
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
-          return await interaction.reply(LL.ERROR_CHANNEL_NOT_FOUND());
+          return await interaction.editReply(LL.ERROR_CHANNEL_NOT_FOUND());
         }
       } else {
         console.error(error);
-        return await interaction.reply(LL.ERROR_UNKNOWN());
+        return await interaction.editReply(LL.ERROR_UNKNOWN());
       }
     }
   }
