@@ -6,7 +6,7 @@
   "type": "module",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc-esm-fix --ext='.js'",
     "dev": "tsx watch src/index.ts",
     "start": "node build/index.js",
     "typesafe-i18n": "typesafe-i18n"
@@ -26,6 +26,7 @@
     "prettier": "^3.3.2",
     "prisma": "^5.17.0",
     "ts-loader": "^9.5.1",
+    "tsc-esm-fix": "^3.0.2",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4",
     "webpack": "^5.94.0",

@@ -1,4 +1,4 @@
-import { importx } from "@discordx/importer";
+import { dirname, importx, isESM } from "@discordx/importer";
 import type { Interaction, Message } from "discord.js";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
@@ -52,7 +52,7 @@ bot.on("messageCreate", (message: Message) => {
 
 async function run() {
   // Register all commands and events in the ./commands and ./events folders
-  await importx(`./{events,commands}/**/*.{ts,js}`);
+  await importx(`${dirname(import.meta.url)}/{events,commands}/**/*.{ts,js}`);
 
   // Let's start the bot
   if (!process.env.DISCORD_TOKEN) {
