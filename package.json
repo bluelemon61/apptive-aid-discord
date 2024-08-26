@@ -6,7 +6,7 @@
   "type": "module",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc-esm-fix --ext='.js'",
+    "build": "tsc && tsc-esm-fix --ext='.js'",
     "dev": "tsx watch src/index.ts",
     "start": "node build/index.js",
     "typesafe-i18n": "typesafe-i18n"
