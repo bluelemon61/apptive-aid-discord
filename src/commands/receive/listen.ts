@@ -153,7 +153,7 @@ export class Receiver {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
-    interaction.deferReply();
+    await interaction.deferReply();
 
     const senderChannels = await getSenderChannels(interaction, "");
     if (senderChannels.findIndex((c) => c.id === from) === -1) {

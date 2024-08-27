@@ -95,7 +95,7 @@ export class Sender {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
-    interaction.deferReply();
+    await interaction.deferReply();
 
     const textChannels = await getTextChannels(interaction, "");
     if (textChannels.findIndex((c) => c.id === channel) === -1) {

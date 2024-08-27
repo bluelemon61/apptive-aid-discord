@@ -21,7 +21,7 @@ export class Recevier {
       return await interaction.reply(LL.ERROR_GUILD_NOT_FOUND());
     }
 
-    interaction.deferReply();
+    await interaction.deferReply();
 
     // 디스코드 서버에 등록된 모든 수신 채널 조회
     const allChannels = Array.from(
