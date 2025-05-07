@@ -1,4 +1,4 @@
-import type { Translation } from "../i18n-types.js";
+import type { Translation } from "../i18n-types";
 
 const ko = {
   ERROR_GUILD_NOT_FOUND: "오류: 서버를 찾을 수 없습니다.",
